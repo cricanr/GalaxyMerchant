@@ -31,6 +31,14 @@ class MerchantSpec extends WordSpec with Matchers {
       }
     }
 
+    "given a knowledge base complex line: 'glob prok Gold is 57800 Credits'" should {
+      "return TranslatedKnowledgeBaseItem('Gold', 14450)" in {
+        val merchant = new Merchant()
+        merchant.mapLine("glob prok Gold is 14450 Credits".trim) shouldEqual
+          Some(TranslatedKnowledgeBaseItem("Gold", 14450))
+      }
+    }
+
     "given translated symbols '1 1'" should {
       "return 2 " in {
         Merchant.sumTranslatedSymbols("1 1") shouldBe 2

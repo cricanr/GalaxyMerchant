@@ -95,8 +95,10 @@ class Merchant {
 
   def getResorcesValue(line: String): Option[TranslatedKnowledgeBaseItem] = {
     // glob glob Silver is 34
+    import Resource._
+    val resource = containsResource(line)
     line match {
-      case l if l contains "Silver" => getResVal("Silver", l.replace(" Silver", ""))
+      case ln if !resource.equals(Undefined) => getResVal(resource.toString, ln.replace(s" $resource", ""))
     }
   }
 
