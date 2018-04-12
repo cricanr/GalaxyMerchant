@@ -1,5 +1,7 @@
 package example
 
+import scala.util.Try
+
 /*
 https://github.com/chalkmaster/MerchantsGuideToTheGalaxy
 
@@ -52,23 +54,28 @@ I have no idea what you are talking about
  */
 
 case class KnowledgeBaseItem(word: String, romanNumber: String)
-case class KnowledgeBase(knowledgeBaseItems: Seq[KnowledgeBaseItem])
+
+case class KnowledgeBase(knowledgeBaseItems: Seq[TranslatedKnowledgeBaseItem])
 
 case class TranslatedKnowledgeBaseItem(resource: String, credits: Int)
 
 class Merchant {
+
+  import Merchant._
+
   def mapLines(lines: String): KnowledgeBase = {
     KnowledgeBase(lines.split("\n").map(mapLine).toList.filter(_.isDefined).flatten)
   }
 
-  def toRoman(word: String): Option[String] = {
-    val knowledgeBase = KnowledgeBase(List(KnowledgeBaseItem("glob", "I"),
-      KnowledgeBaseItem("prok", "V"),
-      KnowledgeBaseItem("pish", "X"),
-      KnowledgeBaseItem("tegj", "L")))
+  def translateSymbol(word: String): Option[Int] = {
+    val romanDictionary = new RomanDictionary
+    val knowledgeBase = KnowledgeBase(List(TranslatedKnowledgeBaseItem("glob", romanDictionary.romanSymbols("I")),
+      TranslatedKnowledgeBaseItem("prok", romanDictionary.romanSymbols("V")),
+      TranslatedKnowledgeBaseItem("pish", romanDictionary.romanSymbols("X")),
+      TranslatedKnowledgeBaseItem("tegj", romanDictionary.romanSymbols("L"))))
 
     knowledgeBase.knowledgeBaseItems.collectFirst {
-      case knowledgeBaseItem if knowledgeBaseItem.word == word => knowledgeBaseItem.romanNumber
+      case translatedKnowledgeBaseItem if translatedKnowledgeBaseItem.resource == word => translatedKnowledgeBaseItem.credits
     }
   }
 
@@ -76,13 +83,13 @@ class Merchant {
     // glob glob is 34
     val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
-    line match  {
-      case l if line contains " is " =>
-        val romanNumber = words(0).split(" ").map(word => toRoman(word)).collect {
+    line match {
+      case _ if line contains " is " =>
+        val translatedSymbols = words(0).split(" ").map(word => translateSymbol(word)).collect {
           case romanLiteral if romanLiteral.isDefined => romanLiteral.get
         }.mkString(" ")
 
-        Some(TranslatedKnowledgeBaseItem(resource, words(1).toInt / romanDictionary.sumRomanNumbers(romanNumber)))
+        Some(TranslatedKnowledgeBaseItem(resource, words(1).toInt / sumTranslatedSymbols(translatedSymbols)))
     }
   }
 
@@ -93,12 +100,23 @@ class Merchant {
     }
   }
 
-  def mapLine(line: String): Option[KnowledgeBaseItem] = {
+  def mapLineTranslated(line: String): Option[TranslatedKnowledgeBaseItem] = {
+    mapLine(line)
+  }
+
+  def mapLine(line: String): Option[TranslatedKnowledgeBaseItem] = {
+    val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
     line match {
       case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
-      case constant if constant contains "is" => Some(KnowledgeBaseItem(words(0), words(1)))
+      case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanDictionary.romanSymbols(words(1))))
       case "" => None
     }
+  }
+}
+
+object Merchant {
+  def sumTranslatedSymbols(translatedSymbols: String): Int = {
+    translatedSymbols.split(" ").map(numberStr => Try(numberStr.toInt).getOrElse(0)).sum
   }
 }
