@@ -62,6 +62,7 @@ case class TranslatedKnowledgeBaseItem(resource: String, credits: Int)
 class Merchant {
 
   import Merchant._
+  import Resource._
 
   def mapLines(lines: String): KnowledgeBase = {
     KnowledgeBase(lines.split("\n").map(mapLine).toList.filter(_.isDefined).flatten)
@@ -94,8 +95,6 @@ class Merchant {
   }
 
   def getResorcesValue(line: String): Option[TranslatedKnowledgeBaseItem] = {
-    // glob glob Silver is 34
-    import Resource._
     val resource = containsResource(line)
     line match {
       case ln if !resource.equals(Undefined) => getResVal(resource.toString, ln.replace(s" $resource", ""))
