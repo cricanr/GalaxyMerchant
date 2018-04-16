@@ -56,8 +56,10 @@ I have no idea what you are talking about
 case class KnowledgeBaseItem(word: String, romanNumber: String)
 
 case class KnowledgeBase(knowledgeBaseItems: Seq[TranslatedKnowledgeBaseItem])
+case class RomanKnowledgeBase(romanKnowledgeBase: Seq[RomanKnowledgeBaseItem])
 
 case class TranslatedKnowledgeBaseItem(resource: String, credits: Int)
+case class RomanKnowledgeBaseItem(resource: String, credits: String)
 
 class Merchant {
 
@@ -66,6 +68,18 @@ class Merchant {
 
   def mapLines(lines: String): KnowledgeBase = {
     KnowledgeBase(lines.split("\n").map(mapLine).toList.filter(_.isDefined).flatten)
+  }
+
+  def translateToRomanSymbol(word: String): Option[String] = {
+    val knowledgeBase = RomanKnowledgeBase(List(
+      RomanKnowledgeBaseItem("glob", "I"),
+      RomanKnowledgeBaseItem("prok", "V"),
+      RomanKnowledgeBaseItem("pish", "X"),
+      RomanKnowledgeBaseItem("tegj", "L")))
+
+    knowledgeBase.romanKnowledgeBase.collectFirst {
+      case romanKnowledgeBaseItem if romanKnowledgeBaseItem.resource == word => romanKnowledgeBaseItem.credits
+    }
   }
 
   def translateSymbol(word: String): Option[Int] = {
@@ -86,11 +100,11 @@ class Merchant {
     val words = line.split(" is ")
     line match {
       case _ if line contains " is " =>
-        val translatedSymbols = words(0).split(" ").map(word => translateSymbol(word)).collect {
+        val translatedSymbols = words(0).split(" ").map(word => translateToRomanSymbol(word)).collect {
           case romanLiteral if romanLiteral.isDefined => romanLiteral.get
-        }.mkString(" ")
+        }.mkString("")
 
-        Some(TranslatedKnowledgeBaseItem(resource, words(1).toInt / sumTranslatedSymbols(translatedSymbols)))
+        Some(TranslatedKnowledgeBaseItem(resource, words(1).toInt / romanDictionary.translateRomanNumber(translatedSymbols)))
     }
   }
 
@@ -118,6 +132,6 @@ class Merchant {
 
 object Merchant {
   def sumTranslatedSymbols(translatedSymbols: String): Int = {
-    translatedSymbols.split(" ").map(numberStr => Try(numberStr.toInt).getOrElse(0)).sum
+    translatedSymbols.map(numberStr => numberStr.asDigit).sum
   }
 }
