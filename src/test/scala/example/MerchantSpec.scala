@@ -41,7 +41,7 @@ class MerchantSpec extends WordSpec with Matchers {
 
     "given translated symbols '11'" should {
       "return 2 " in {
-        Merchant.sumTranslatedSymbols("11") shouldBe 2
+        Merchant.sumTranslatedSymbols("1 1") shouldBe 2
       }
     }
   }

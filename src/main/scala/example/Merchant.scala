@@ -118,6 +118,6 @@ class Merchant {
 
 object Merchant {
   def sumTranslatedSymbols(translatedSymbols: String): Int = {
-    translatedSymbols.map(numberStr => numberStr.asDigit).sum
+    translatedSymbols.split(" ").map(numberStr => Try(numberStr.toInt).getOrElse(0)).sum
   }
 }
