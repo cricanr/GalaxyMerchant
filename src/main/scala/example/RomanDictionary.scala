@@ -1,8 +1,21 @@
 package example
 
-import scala.util.Try
-
 class RomanDictionary {
+  def translateRomanNumber(romanNumber: String): Int = {
+    "MCMXLIV"
+    val numbers = for (i <- 0 until romanNumber.length-1) yield
+      (romanNumber(i), romanNumber(i + 1)) match {
+        case (first, second) if romanSymbols(first.toString) > romanSymbols(second.toString) =>
+          romanSymbols(first.toString)
+        case (first, second) if romanSymbols(first.toString) < romanSymbols(second.toString) && second != romanNumber(romanNumber.length-1) =>
+          -romanSymbols(first.toString)
+        case (first, second) if romanSymbols(first.toString) < romanSymbols(second.toString) && second == romanNumber(romanNumber.length-1) =>
+          -romanSymbols(first.toString) + romanSymbols(second.toString)
+      }
+
+    numbers.sum
+  }
+
   val romanSymbols = Map(
     "I" -> 1,
     "V" -> 5,
