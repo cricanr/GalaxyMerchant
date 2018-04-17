@@ -1,4 +1,4 @@
-package example
+package merchant
 
 
 /*
@@ -52,26 +52,33 @@ glob prok Iron is 782 Credits
 I have no idea what you are talking about
  */
 
-case class KnowledgeBaseItem(word: String, romanNumber: String)
-
-case class KnowledgeBase(knowledgeBaseItems: Seq[TranslatedKnowledgeBaseItem])
-
-case class RomanKnowledgeBase(romanKnowledgeBase: Seq[RomanKnowledgeBaseItem])
-
-case class TranslatedKnowledgeBaseItem(resource: String, credits: Int)
-
-case class RomanKnowledgeBaseItem(resource: String, credits: String)
-
 class Merchant {
-  import example.Resource._
+  import merchant.Resource._
+  import KnowledgeLibrary._
+
+  def findResVal(resource: String, ln: String): TranslatedKnowledgeBaseItem = {
+    val romanDictionary = new RomanDictionary
+    val translatedSymbols = ln.split(" ").map(word => translateToRomanSymbol(word)).collect {
+      case romanLiteral if romanLiteral.isDefined => romanLiteral.get
+    }.mkString("")
+
+    val resourceValue = getResourceValue(resource) * romanDictionary.translateRomanNumber(translatedSymbols)
+    TranslatedKnowledgeBaseItem(s"$ln is $resourceValue Credits", resourceValue)
+  }
+
+  def findResourceValue(line: String): TranslatedKnowledgeBaseItem = {
+    val resource = containsResource(line)
+    line match {
+      case ln if !resource.equals(Undefined) => findResVal(resource.toString, ln)
+    }
+  }
 
   def queryLine(query: String): TranslatedKnowledgeBaseItem = {
     query match {
       case in if in.startsWith("how much is") && in.contains(" ?") =>
         getValue(query.replace("how much is ", "").replace(" ?", ""))
       case in if in.startsWith("how many Credits is") && in.contains(" ?") =>
-        //getResorcesValue(in.replace("how many Credits is ", "").replace(" ?", "")).getOrElse(TranslatedKnowledgeBaseItem("", 0))
-        ???
+        findResourceValue(in.replace("how many Credits is ", "").replace(" ?", ""))
     }
   }
 
@@ -86,31 +93,18 @@ class Merchant {
   }
 
   def translateToRomanSymbol(word: String): Option[String] = {
-    val knowledgeBase = RomanKnowledgeBase(List(
-      RomanKnowledgeBaseItem("glob", "I"),
-      RomanKnowledgeBaseItem("prok", "V"),
-      RomanKnowledgeBaseItem("pish", "X"),
-      RomanKnowledgeBaseItem("tegj", "L")))
-
-    knowledgeBase.romanKnowledgeBase.collectFirst {
+    romanKnowledgeBase.romanKnowledgeBase.collectFirst {
       case romanKnowledgeBaseItem if romanKnowledgeBaseItem.resource == word => romanKnowledgeBaseItem.credits
     }
   }
 
   def translateSymbol(word: String): Option[Int] = {
-    val romanDictionary = new RomanDictionary
-    val knowledgeBase = KnowledgeBase(List(TranslatedKnowledgeBaseItem("glob", romanDictionary.romanSymbols("I")),
-      TranslatedKnowledgeBaseItem("prok", romanDictionary.romanSymbols("V")),
-      TranslatedKnowledgeBaseItem("pish", romanDictionary.romanSymbols("X")),
-      TranslatedKnowledgeBaseItem("tegj", romanDictionary.romanSymbols("L"))))
-
     knowledgeBase.knowledgeBaseItems.collectFirst {
       case translatedKnowledgeBaseItem if translatedKnowledgeBaseItem.resource == word => translatedKnowledgeBaseItem.credits
     }
   }
 
   def getResVal(resource: String, line: String): Option[TranslatedKnowledgeBaseItem] = {
-    // glob glob is 34
     val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
     line match {
@@ -145,13 +139,14 @@ class Merchant {
   def mapLine(line: String): Option[TranslatedKnowledgeBaseItem] = {
     val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
+    val isQueryLn = isQueryLine(line)
 
     line match {
-      case l if isQueryLine(l) => Some(queryLine(l))
+      case l if isQueryLn => Some(queryLine(l))
       case l => l match {
         case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
         case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanDictionary.romanSymbols(words(1))))
-        case "" => None
+        case _ if !isQueryLn => Some(TranslatedKnowledgeBaseItem("I have no idea what you are talking about", 0))
       }
     }
   }

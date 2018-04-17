@@ -1,4 +1,4 @@
-package example
+package merchant
 
 class RomanDictionary {
   def translateRomanNumber(romanNumber: String): Int = {

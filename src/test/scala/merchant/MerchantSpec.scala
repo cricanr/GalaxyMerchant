@@ -1,4 +1,4 @@
-package example
+package merchant
 
 import org.scalatest.{Matchers, WordSpec}
 
@@ -66,6 +66,22 @@ class MerchantSpec extends WordSpec with Matchers {
         val merchant = new Merchant()
         merchant.mapLine("how many Credits is glob prok Silver ?".trim) shouldEqual
           Some(TranslatedKnowledgeBaseItem("glob prok Silver is 68 Credits", 68))
+      }
+    }
+
+    "given a query line: 'how many Credits is glob prok Iron ?'" should {
+      "return 'glob prok Iron is 780 Credits'" in {
+        val merchant = new Merchant()
+        merchant.mapLine("how many Credits is glob prok Iron ?".trim) shouldEqual
+          Some(TranslatedKnowledgeBaseItem("glob prok Iron is 780 Credits", 780))
+      }
+    }
+
+    "given a query line: 'how much wood could a woodchuck chuck if a woodchuck could chuck wood ?'" should {
+      "return 'I have no idea what you are talking about'" in {
+        val merchant = new Merchant()
+        merchant.mapLine("how much wood could a woodchuck chuck if a woodchuck could chuck wood ?".trim) shouldEqual
+          Some(TranslatedKnowledgeBaseItem("I have no idea what you are talking about", 0))
       }
     }
   }

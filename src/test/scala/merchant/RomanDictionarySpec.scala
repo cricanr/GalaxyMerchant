@@ -1,4 +1,4 @@
-package example
+package merchant
 
 import org.scalatest.{Matchers, WordSpec}
 
