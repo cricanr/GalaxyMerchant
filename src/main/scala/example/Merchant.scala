@@ -1,6 +1,5 @@
 package example
 
-import scala.util.Try
 
 /*
 https://github.com/chalkmaster/MerchantsGuideToTheGalaxy
@@ -56,15 +55,31 @@ I have no idea what you are talking about
 case class KnowledgeBaseItem(word: String, romanNumber: String)
 
 case class KnowledgeBase(knowledgeBaseItems: Seq[TranslatedKnowledgeBaseItem])
+
 case class RomanKnowledgeBase(romanKnowledgeBase: Seq[RomanKnowledgeBaseItem])
 
 case class TranslatedKnowledgeBaseItem(resource: String, credits: Int)
+
 case class RomanKnowledgeBaseItem(resource: String, credits: String)
 
 class Merchant {
+  import example.Resource._
 
-  import Merchant._
-  import Resource._
+  def queryLine(query: String): TranslatedKnowledgeBaseItem = {
+    query match {
+      case in if in.startsWith("how much is") && in.contains(" ?") =>
+        getValue(query.replace("how much is ", "").replace(" ?", ""))
+      case in if in.startsWith("how many Credits is") && in.contains(" ?") =>
+        //getResorcesValue(in.replace("how many Credits is ", "").replace(" ?", "")).getOrElse(TranslatedKnowledgeBaseItem("", 0))
+        ???
+    }
+  }
+
+  private def getValue(query: String) = {
+    val romanDictionary = new RomanDictionary()
+    val translatedRomanNumbers = query.split(" ").flatMap(translateToRomanSymbol).mkString("")
+    TranslatedKnowledgeBaseItem(s"$query is", romanDictionary.translateRomanNumber(translatedRomanNumbers))
+  }
 
   def mapLines(lines: String): KnowledgeBase = {
     KnowledgeBase(lines.split("\n").map(mapLine).toList.filter(_.isDefined).flatten)
@@ -119,13 +134,25 @@ class Merchant {
     mapLine(line)
   }
 
+  def isQueryLine(input: String): Boolean = {
+    input match {
+      case in if in.startsWith("how much is") && in.contains(" ?") => true
+      case in if in.startsWith("how many Credits is") && in.contains(" ?") => true
+      case _ => false
+    }
+  }
+
   def mapLine(line: String): Option[TranslatedKnowledgeBaseItem] = {
     val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
+
     line match {
-      case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
-      case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanDictionary.romanSymbols(words(1))))
-      case "" => None
+      case l if isQueryLine(l) => Some(queryLine(l))
+      case l => l match {
+        case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
+        case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanDictionary.romanSymbols(words(1))))
+        case "" => None
+      }
     }
   }
 }

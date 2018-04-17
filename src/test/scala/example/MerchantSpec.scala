@@ -52,5 +52,21 @@ class MerchantSpec extends WordSpec with Matchers {
         Merchant.sumTranslatedSymbols("11") shouldBe 2
       }
     }
+
+    "given a query line: 'how much is pish tegj glob glob ?'" should {
+      "return 'pish tegj glob glob is 42'" in {
+        val merchant = new Merchant()
+        merchant.mapLine("how much is pish tegj glob glob ?".trim) shouldEqual
+          Some(TranslatedKnowledgeBaseItem("pish tegj glob glob is", 42))
+      }
+    }
+
+    "given a query line: 'how many Credits is glob prok Silver ?'" should {
+      "return 'glob prok Silver is 68 Credits'" in {
+        val merchant = new Merchant()
+        merchant.mapLine("how many Credits is glob prok Silver ?".trim) shouldEqual
+          Some(TranslatedKnowledgeBaseItem("glob prok Silver is 68 Credits", 68))
+      }
+    }
   }
 }
