@@ -117,7 +117,7 @@ class Merchant {
     }
   }
 
-  def getResorcesValue(line: String): Option[TranslatedKnowledgeBaseItem] = {
+  def getResourcesValue(line: String): Option[TranslatedKnowledgeBaseItem] = {
     val resource = containsResource(line)
     line match {
       case ln if !resource.equals(Undefined) => getResVal(resource.toString, ln.replace(s" $resource", ""))
@@ -137,14 +137,13 @@ class Merchant {
   }
 
   def mapLine(line: String): Option[TranslatedKnowledgeBaseItem] = {
-    val romanDictionary = new RomanDictionary
     val words = line.split(" is ")
     val isQueryLn = isQueryLine(line)
 
     line match {
       case l if isQueryLn => Some(queryLine(l))
       case l => l match {
-        case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
+        case declaration if declaration contains "Credits" => getResourcesValue(declaration.replace(" Credits", ""))
         case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanSymbols(words(1))))
         case _ if !isQueryLn => Some(TranslatedKnowledgeBaseItem("I have no idea what you are talking about", 0))
       }
