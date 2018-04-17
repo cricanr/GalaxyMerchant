@@ -2,9 +2,8 @@ package merchant
 
 object Resource extends Enumeration {
   type Resource = Value
-
   val Silver, Gold, Iron, Undefined = Value
-
+  
   private val allResources = Seq(Silver, Gold, Iron)
   private val resourceValue = Map(Silver -> 17, Gold -> 14450, Iron -> 195)
 

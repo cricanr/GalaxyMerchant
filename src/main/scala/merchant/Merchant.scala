@@ -1,7 +1,6 @@
 package merchant
 
-
-/*
+/* Requirements - instructions
 https://github.com/chalkmaster/MerchantsGuideToTheGalaxy
 
 A merchant buys and sells items in the galaxy. Buying and selling over the galaxy requires you to convert numbers and units.
@@ -55,6 +54,7 @@ I have no idea what you are talking about
 class Merchant {
   import merchant.Resource._
   import KnowledgeLibrary._
+  import RomanDictionary._
 
   def findResVal(resource: String, ln: String): TranslatedKnowledgeBaseItem = {
     val romanDictionary = new RomanDictionary
@@ -145,7 +145,7 @@ class Merchant {
       case l if isQueryLn => Some(queryLine(l))
       case l => l match {
         case declaration if declaration contains "Credits" => getResorcesValue(declaration.replace(" Credits", ""))
-        case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanDictionary.romanSymbols(words(1))))
+        case constant if constant contains "is" => Some(TranslatedKnowledgeBaseItem(words(0), romanSymbols(words(1))))
         case _ if !isQueryLn => Some(TranslatedKnowledgeBaseItem("I have no idea what you are talking about", 0))
       }
     }
